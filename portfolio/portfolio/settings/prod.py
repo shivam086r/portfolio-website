@@ -21,14 +21,17 @@ CLOUDINARY_STORAGE = {
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', os.environ.get("HOST_NAME")]
+# Ensure CSRF_TRUSTED_ORIGINS includes a valid domain, and fallback to localhost if none provided.
+HOST_NAME = os.environ.get("HOST_NAME", None)  # Ensure this is set in your environment
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-DATABASES["default"] = dj_database_url.config(default=DATABASE_URL, conn_max_age=500, ssl_require=True)
-
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+if HOST_NAME:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.127.0.0.1',  # Allow local development
+        f'https://{HOST_NAME}',  # Dynamic host name from environment
+    ]
+else:
+    # Fallback for local development
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+    ]
